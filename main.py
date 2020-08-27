@@ -52,23 +52,27 @@ if __name__ == "__main__":
 			lastCrawledDT = collection.find_one({"_id" : doc_id})['lastCrawledDT']
 			if lastCrawledDT is not None and \
 				lastCrawledDT > datetime.now() - timedelta(days=1):
+					log.info(f' The url is already crawled')
 					continue
 
 			# make connection requests to url
 			try:
 				req = requests.get(url)
 			except OSError as Exception:
-				log.info(f"Error occured with {url}\n{Exception}")
+				log.info(f" Error occured with {url} at time {datetime.now()}\n{Exception}")
 				continue
 
 			# if status not ok
-			if req.status_code != 200: continue
+			if req.status_code != 200:
+				log.info(f' Status code returned : {req.status_code} .\n Ignoring the url...')
+				continue
 
 			# create html file after successful request
 			if 'text/html' in req.headers['content-type']:
 				html_doc = req.text
 				file_path, file_created_DT = create_file(html_doc, conf.file_dir, conf.path, 'utf-8')
 			else:
+				log.info(f' Not html.. ignored')
 				continue
 
 			# update the database information
