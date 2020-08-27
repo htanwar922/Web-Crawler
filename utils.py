@@ -1,16 +1,24 @@
 #!/usr/bin/env python3
 
-
 import sys, os, time
+from pathlib import Path
 from datetime import datetime, timedelta
-import queue, requests
-import threading
+from queue import Queue
+import threading, tempfile, requests, uuid
+from bs4 import BeautifulSoup
+from pymongo import MongoClient
 
-import bs4 as BeautifulSoup
-from pymongo import MongoClient, ReturnDocument, IndexModel, InsertOne, DeleteOne, DeleteMany, UpdateOne, UpdateMany, ReplaceOne
+from logger import *
 
-def parse_request_date_time(req):
-	return datetime.strptime(r.headers['date'], '%a, %d %b %Y %H:%M:%S GMT')
+def create_dirs(dir_path):
+	if dir_path and not os.path.exists(dir_path):
+		try: os.makedirs(dir_path)
+		except OSError as exc:
+			if exc.errno != errno.EEXIST: raise
+
+
+def parse_https_date_time(req):
+	return datetime.strptime(req.headers['date'], '%a, %d %b %Y %H:%M:%S GMT')
 
 def check_db(collection, url, src_url):
 	doc = collection.find_one({"url" : url})
@@ -31,28 +39,44 @@ def check_db(collection, url, src_url):
 	return doc_id
 
 
-def create_file(req):
-	pass
+def create_file(doc, dir=Path('../files'), path=None, encoding='utf-8'):
+	"""
+	Create unique files in dir and write the doc to it.
+	Parameters :
+		doc : document to write
+		dir : directory where file is to be created - Path('../files') by default
+		encoding : utf-8 by default
+	Returns :
+		file path with .html extension : str
+		file creation date-time : datetime
+	"""
 	# generate random name and save the req content to path
-	return html_doc, file_path, file_created_at
+	filename = str(uuid.uuid4()) + '.html'
+	file_path = Path(path or os.getcwd()) / dir / filename
+	create_dirs(os.path.dirname(file_path))
+	with open(file_path, 'w', encoding='utf-8') as foo:
+		foo.write(doc)
+	file_created_DT = datetime.now()
+	foo.close()
+	return str(file_path), file_created_DT
 
 
-def update_db(collection, url, src_url, req, file_path, file_created_at):
-	collection.update_one({'url' : url},
+def update_db(collection, url, src_url, req, file_path, file_created_DT):
+	collection.update_one({'link' : url},
 							{'$set' : {
 									"link" : url,
 									"src_link" : src_url,
 									"isCrawled" : True,
-									"lastCrawledDT" : parse_request_date_time(req),
+									"lastCrawledDT" : parse_https_date_time(req),
 									"responseStatus" : req.status_code,
 									"contentType" : req.headers['content-type'],
 									"contentLength" : 0,
 									"filePath" : file_path,
-									"createdAt" : file_created_at
+									"createdAt" : file_created_DT
 							}})
 
 
-def scrape_url(html_doc):
+def scrape_url(html_doc, parent_url):
 	"""
 	Get all links from 'href' attribute of <a> tags in the doc.
 	Parameters :
@@ -65,5 +89,9 @@ def scrape_url(html_doc):
 
 	newQ = Queue(maxsize=5000)
 	for tag in tags:
-		newQ.put(tag.get('href'))
+		url = tag.get('href')
+		if url and url[0] == '/':
+			url = parent_url + url
+		newQ.put(url)
+		log.debug(f' inside scrape function : {url}')
 	return newQ
