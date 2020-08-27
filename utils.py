@@ -90,8 +90,12 @@ def scrape_url(html_doc, parent_url):
 	newQ = Queue(maxsize=5000)
 	for tag in tags:
 		url = tag.get('href')
+		# ignore invalid links
+		if url.endswith(':;') or url.startswith('#'):
+			continue
+		# handling relative links
 		if url and url[0] == '/':
 			url = parent_url + url
 		newQ.put(url)
-		log.debug(f' inside scrape function : {url}')
+		log.debug(f' \tinside scrape function : {url}')
 	return newQ
