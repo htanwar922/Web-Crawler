@@ -11,7 +11,8 @@ config = {
 		'log_file' : './log.txt',
 		'log_user' : '__WebCrawler__',
 		'max_db_size' : 1000000,
-		'file_dir' : '../files'				# relative to 'path' above
+		'file_dir' : '../files',				# relative to 'path' above
+		'continue_left_off' : False
 	}
 
 default = {
@@ -25,5 +26,6 @@ default = {
 		'log_file' : './log.txt',
 		'log_user' : '__WebCrawler__',
 		'max_db_size' : None,
-		'file_dir' : '../files'
+		'file_dir' : '../files',				# relative to 'path' above
+		'continue_left_off' : False
 	}

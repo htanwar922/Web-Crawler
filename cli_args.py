@@ -29,10 +29,12 @@ parser.add_argument('--log_user', type=str, default=config['log_user'])
 parser.add_argument('--max_db_size', type=int, default=config['max_db_size'])
 # directory to store files (absolute path)
 parser.add_argument('--file_dir', type=str, default=config['file_dir'])
+# continue from previously left-off crawling
+parser.add_argument('--continue_left_off', type=str, default=config['continue_left_off'])
 
 conf = parser.parse_args()
 
 os.chdir(Path(conf.path) or os.path.dirname(__file__))
 
 if __name__ == "__main__":
-    pass
+    print(conf.root_url)

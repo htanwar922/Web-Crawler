@@ -19,7 +19,7 @@ def crawl_link(collection, url):
 	doc = collection.find_one({"link" : url})
 	if doc is not None and doc['isCrawled'] and\
 		doc['lastCrawledDT'] > datetime.now() - timedelta(days=1):
-			log.info(f' The url is already crawled within last 24hr')
+			log.info(f' \tThe {url} is already crawled within last 24hr')
 			return
 	
 	# make connection requests to url
@@ -37,7 +37,7 @@ def crawl_link(collection, url):
 	# create html file after successful request
 	if 'text/html' in req.headers['content-type']:
 		html_doc = req.text
-		file_path, file_created_DT = create_file(html_doc, conf.file_dir, conf.path, 'utf-8')
+		file_path, file_created_DT = create_file(html_doc, conf.file_dir, conf.path, 'utf-8', doc['filePath'])
 	else:
 		log.info(f' Not html.. ignored')
 		return
@@ -62,13 +62,15 @@ def main(collection, doc, src_url):
     scrape_urls(collection, html_doc, url, src_url)
 
 
+client = MongoClient(conf.client)
+db = client[conf.database]
+collection = db[conf.collection]
+
+
 if __name__ == "__main__":
-	client = MongoClient(conf.client)
-	db = client[conf.database]
-	collection = db[conf.collection]
 	log.info(f' Connected to client : {client}\nUsing database : {db}, collection : {collection}')
 
-	src_url = url = conf.root_url or input()
+	src_url = url = conf.root_url or input("Enter root link : ")
 	doc = collection.find_one({"link" : url})
 	if not doc:
 		log.info(f" Starting afresh, creating new doc for {url} ...")
@@ -81,9 +83,12 @@ if __name__ == "__main__":
 
 	while True:
 		# filter the links of interest
-		if collection.count_documents({"isCrawled" : False}) != 0:   # {"$and" : [{"src_link" : src_url}, {"isCrawled" : False}] }
+		if conf.continue_left_off and collection.count_documents({"isCrawled" : False}) != 0:
 			log.info(" Crawling uncrawled links")
-			next_docs = collection.find({"isCrawled" : False})   # {"$and" : [{"src_link" : src_url}, {"isCrawled" : False}] }
+			next_docs = collection.find({"isCrawled" : False})
+		elif collection.count_documents({"$and" : [{"src_link" : src_url}, {"isCrawled" : False}] }) != 0:
+			log.info(" Crawling uncrawled links")
+			next_docs = collection.find({"$and" : [{"src_link" : src_url}, {"isCrawled" : False}] })
 		elif collection.count_documents({"lastCrawledDT" : {"$gt" : datetime.now() - timedelta(days=1)}}) != 0:
 			log.info(" Crawling older links...")
 			next_docs = collection.find({"lastCrawledDT" : {"$gt" : datetime.now() - timedelta(days=1)}})

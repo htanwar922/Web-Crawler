@@ -3,7 +3,6 @@ print(__file__)
 import sys, os, time
 from pathlib import Path
 from datetime import datetime, timedelta
-from queue import Queue
 import threading, tempfile, requests, uuid
 from bs4 import BeautifulSoup
 from pymongo import MongoClient
@@ -34,14 +33,14 @@ def new_doc(collection, url, src_url):
 				"lastCrawledDT" : None,
 				"responseStatus" : None,
 				"contentType" : None,
-				"contentLength" : 0,
+				"contentLength" : None,
 				"filePath" : None,
 				"createdAt" : None
 			}).inserted_id
 	return doc_id
 
 
-def create_file(doc, filedir=Path('../files'), filepath=None, encoding='utf-8'):
+def create_file(doc, filedir=Path('../files'), filepath=None, encoding='utf-8', existing_file=None):
 	"""
 	Create unique files in dir and write the doc to it.
 	Parameters :
@@ -56,7 +55,7 @@ def create_file(doc, filedir=Path('../files'), filepath=None, encoding='utf-8'):
 	filename = str(uuid.uuid4()) + '.html'
 	file_path = Path(filepath or os.getcwd()) / filedir / filename
 	create_dirs(os.path.dirname(file_path))
-	with open(file_path, 'w', encoding='utf-8') as foo:
+	with open(existing_file or file_path, 'w', encoding='utf-8') as foo:
 		foo.write(doc)
 	file_created_DT = datetime.now()
 	foo.close()
@@ -65,6 +64,10 @@ def create_file(doc, filedir=Path('../files'), filepath=None, encoding='utf-8'):
 
 def update_db(collection, url, src_url, req, file_path=None, file_created_DT=None, isCrawled=True):
 	doc = collection.find_one({'link' : url})
+	try:
+		clen = req.headers['content-length']
+	except KeyError:
+		clen = None
 	collection.update_one({'link' : url},
 							{'$set' : {
 									"link" : url,
@@ -73,7 +76,7 @@ def update_db(collection, url, src_url, req, file_path=None, file_created_DT=Non
 									"lastCrawledDT" : parse_https_date_time(req),
 									"responseStatus" : req.status_code,
 									"contentType" : req.headers['content-type'] if req.status_code == 200 else None,
-									"contentLength" : 0 or doc['contentLength'],
+									"contentLength" : clen or doc['contentLength'],
 									"filePath" : file_path or doc['filePath'],
 									"createdAt" : file_created_DT or doc['createdAt']
 							}})
