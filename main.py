@@ -96,7 +96,11 @@ if __name__ == "__main__":
 
 			for i, doc in enumerate(next_docs):
 				docs += [doc]
+<<<<<<< HEAD
 				if i >= 3: break
+=======
+				if i > 4: break
+>>>>>>> db448ea77517d9563f915b1998f6c50ebcafcc3c
 			
 			with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
 				future_to_doc = { executor.submit(main, collection, doc, src_url) : doc for doc in docs }
@@ -108,4 +112,8 @@ if __name__ == "__main__":
 						pass
 
 		log.info(" Waiting 5 seconds...")
+<<<<<<< HEAD
 		time.sleep(5)
+=======
+		time.sleep(5)
+>>>>>>> db448ea77517d9563f915b1998f6c50ebcafcc3c

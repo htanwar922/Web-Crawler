@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-
+print(__file__)
 import sys, os, logging, errno
 from pathlib import Path
 
-from cli_args import *
+from cli_args import conf
 
 conf.log_file = Path(conf.log_file)
 
