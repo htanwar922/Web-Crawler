@@ -10,6 +10,8 @@ while True:
 
 	if doc is None:
 		print("Link not crawled.")
+	elif doc['filePath'] is None:
+		print("Link was not accessible.")
 	else:
 		print(f"Corresponding file exists at {doc['filePath']} .")
 		p = input("Open in browser? (yes|no) : ")
