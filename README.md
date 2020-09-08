@@ -1,7 +1,10 @@
 # Web-Crawler
 
 <info>
-
+The WebCrawler downloads html files and continously crawls over extracted urls from the html files further. The downloaded files are stored in <code>&lt;path&gt;/&lt;filePath&gt;</code> defined in config.py file or in CLI arguments.<br>
+After each level of extraction, it waits for 5 seconds.<br>
+If the crawling is interrupted, there is an option to <code>&lt;continue\_left\_off&gt;</code> in the configuration.<br>
+The crawler uses MongoDB database for handling of crawled information. The connection to MongoClient can be configured with <code>&lt;client&gt;</code> option.<br>
 </info>
 
 ### Setup
