@@ -13,7 +13,7 @@ Setup in linux can be done by sourcing setup.sh file:<br>
 source setup.sh
 </code>
 <br>
-<p>It creates a python virtual environment in the repo directory itself, and runs <code>main.py</code> with ```config``` options defined in <code>config.py</code> file.</p>
+<p>It creates a python virtual environment in the repo directory itself, and runs <code>main.py</code> with <code>config</code> options defined in <code>config.py</code> file.</p>
 
 For Windows, run from PS:
 <code>
@@ -26,7 +26,7 @@ Either run through above setup or run directly by:<br>
 python3 main.py
 </code>
 <br>
-<p>CLI arguments can also be provided which will override the config options in config.py file.</p>
+<p>CLI arguments can also be provided which will override the config options in <code>config.py</code> file.</p>
 
 ### Get html file
 The path for html file corresponding to any successfully crawled link can be accessed by running the <code>get_html_doc.py</code> file and entering the desired link on prompt.<br>
