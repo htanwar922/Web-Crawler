@@ -5,7 +5,7 @@
 </info>
 
 ### Setup
-<p>Setup in linux can be done by sourcing setup.sh file:</p>
+Setup in linux can be done by sourcing setup.sh file:<br>
 <code lang="bash">
 source setup.sh
 </code>
@@ -18,7 +18,7 @@ bash -c "source setup.sh"
 </code>
 
 ### Run
-<p>Either run through above setup or run directly by:</p>
+Either run through above setup or run directly by:<br>
 <code>
 python3 main.py
 </code>
