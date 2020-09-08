@@ -81,10 +81,10 @@ if __name__ == "__main__":
 
 	while True:
 		# filter the links of interest
-		if collection.count_documents({"isCrawled" : False}) is not 0:   # {"$and" : [{"src_link" : src_url}, {"isCrawled" : False}] }
+		if collection.count_documents({"isCrawled" : False}) != 0:   # {"$and" : [{"src_link" : src_url}, {"isCrawled" : False}] }
 			log.info(" Crawling uncrawled links")
 			next_docs = collection.find({"isCrawled" : False})   # {"$and" : [{"src_link" : src_url}, {"isCrawled" : False}] }
-		elif collection.count_documents({"lastCrawledDT" : {"$gt" : datetime.now() - timedelta(days=1)}}) is not 0:
+		elif collection.count_documents({"lastCrawledDT" : {"$gt" : datetime.now() - timedelta(days=1)}}) != 0:
 			log.info(" Crawling older links...")
 			next_docs = collection.find({"lastCrawledDT" : {"$gt" : datetime.now() - timedelta(days=1)}})
 		else:
@@ -96,11 +96,7 @@ if __name__ == "__main__":
 
 			for i, doc in enumerate(next_docs):
 				docs += [doc]
-<<<<<<< HEAD
 				if i >= 3: break
-=======
-				if i > 4: break
->>>>>>> db448ea77517d9563f915b1998f6c50ebcafcc3c
 			
 			with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
 				future_to_doc = { executor.submit(main, collection, doc, src_url) : doc for doc in docs }
@@ -112,8 +108,4 @@ if __name__ == "__main__":
 						pass
 
 		log.info(" Waiting 5 seconds...")
-<<<<<<< HEAD
 		time.sleep(5)
-=======
-		time.sleep(5)
->>>>>>> db448ea77517d9563f915b1998f6c50ebcafcc3c
